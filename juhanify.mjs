@@ -102,7 +102,7 @@ console.log(
 `;
 
 const packageJson = `{
-  "name": "juhanify-app",
+  "name": "${projectName}",
   "scripts": {
     "start": "node esbuild.config.dev.mjs"
   },
