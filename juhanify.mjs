@@ -1,6 +1,5 @@
 import { mkdir, readdir, writeFile } from "node:fs/promises";
-import { resolve, dirname } from "node:path";
-import { fileURLToPath } from "node:url";
+import { resolve } from "node:path";
 import { spawn } from "node:child_process";
 import assert from "node:assert";
 
@@ -121,9 +120,7 @@ await writeFile(`${projectName}/README.md`, readme, "utf8");
 
 // ----------- Run commands ----------- //
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
-const pathToProject = resolve(__dirname, projectName);
+const pathToProject = resolve(process.cwd(), projectName);
 
 const doSpawn = async (cmd, args, ctx) => {
   return new Promise((res, rej) => {
