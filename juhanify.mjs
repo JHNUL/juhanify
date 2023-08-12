@@ -145,11 +145,11 @@ const doSpawn = async (cmd, args, ctx) => {
 
 await doSpawn("git", ["init"], pathToProject);
 
-// ----------- Yarn install
+// ----------- Npm install
 
-await doSpawn("yarn", ["add", "react", "react-dom"], pathToProject);
+await doSpawn("npm", ["install", "react", "react-dom"], pathToProject);
 await doSpawn(
-  "yarn",
-  ["add", "esbuild", "cli-color", "normalize.css", "-D"],
+  "npm",
+  ["install", "--save-dev", "esbuild", "cli-color", "normalize.css"],
   pathToProject
 );
