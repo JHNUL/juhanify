@@ -1,17 +1,35 @@
-import { mkdir, readdir, writeFile } from "node:fs/promises";
-import { resolve } from "node:path";
+import { mkdir, readdir, copyFile, readFile, writeFile } from "node:fs/promises";
+import { resolve, join, dirname } from "node:path";
+import { fileURLToPath } from "node:url";
 import { spawn } from "node:child_process";
-import assert from "node:assert";
 
-assert.equal(process.argv.length, 3, "Project name expected");
+const args = process.argv;
+let template = "default";
+let projectName = "";
 
-const projectName = process.argv[2].trim();
+for (const arg of args) {
+  const pair = arg.split(/=/);
+  if (pair.length === 2) {
+    const opt = pair[0];
+    const value = pair[1];
+    if (opt === "--template") {
+      template = value;
+    }
+    if (opt === "--projectName") {
+      projectName = value;
+    }
+  }
+}
 
-assert.match(
-  projectName,
-  /^[a-zA-Z_\-0-9]{1,50}$/,
-  "Project name can only contain alphanumeric characters, hyphen and underscore"
-);
+if (!["default"].includes(template)) {
+  console.log(`Template ${template} not supported!`);
+  process.exit(1);
+}
+
+if (!projectName.match(/[a-zA-Z]{1}[a-zA-Z_\-0-9].*/)) {
+  console.log(`Project name ${projectName} can contain only alphanumerics, underscore and hyphen!`);
+  process.exit(1);
+}
 
 const directories = await readdir(".");
 
@@ -20,108 +38,33 @@ if (directories.includes(projectName)) {
   process.exit(1);
 }
 
+const sourcePath = join(dirname(fileURLToPath(import.meta.url)), "templates", template);
+const pathToProject = resolve(process.cwd(), projectName);
+
 // ----------- Create directories
 await mkdir(projectName);
 await mkdir(`${projectName}/public`);
 await mkdir(`${projectName}/src`);
 
 // ----------- Create public directory content
-const html = `<!DOCTYPE html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <link rel="stylesheet" href="/App.css" />
-    <script defer="defer" src="/App.js"></script>
-    <title>Juhanify app</title>
-  </head>
-  <body>
-    <noscript>You need to enable JavaScript to run this app</noscript>
-    <div id="root"></div>
-  </body>
-</html>
-`;
-
-await writeFile(`${projectName}/public/index.html`, html, "utf8");
+const html = await readFile(`${sourcePath}/index.html`, "utf-8");
+const finalHtml = html.replace("$PROJECT_NAME$", projectName);
+await writeFile(`${pathToProject}/public/index.html`, finalHtml);
 
 // ----------- Create src directory content
-const app = `import React from "react";
-import { createRoot } from "react-dom/client";
-
-import "./styles.css";
-
-const root = createRoot(document.getElementById("root"));
-
-root.render(<div>Y HALO THAR!</div>);
-`;
-
-const stylesheet = `@import "normalize.css";
-
-body {
-  color: indigo;
-}
-`;
-
-await writeFile(`${projectName}/src/App.jsx`, app, "utf8");
-await writeFile(`${projectName}/src/styles.css`, stylesheet, "utf8");
+await copyFile(`${sourcePath}/index.jsx`, `${pathToProject}/src/index.jsx`);
+await copyFile(`${sourcePath}/index.css`, `${pathToProject}/src/index.css`);
 
 // ----------- Create root content
-const gitignore = `.yarn/*
-.pnp.*
-node_modules
-`;
-
-const yarnrc = `nodeLinker: node-modules`;
-
-const esbuildDev = `import * as esbuild from "esbuild";
-import { copyFile, rm, mkdir } from "node:fs/promises";
-import clc from "cli-color";
-
-await rm("dist", { recursive: true, force: true });
-await mkdir("dist");
-await copyFile("public/index.html", "dist/index.html");
-
-const ctx = await esbuild.context({
-  entryPoints: ["src/App.jsx"],
-  bundle: true,
-  minify: true,
-  sourcemap: true,
-  target: ["es2020"],
-  outdir: "dist",
-});
-
-const { host, port } = await ctx.serve({
-  servedir: "dist",
-});
-
-console.log(
-  clc.whiteBright("Development server running on ") +
-    clc.greenBright.underline("http://" + host + ":" + port)
-);
-`;
-
-const packageJson = `{
-  "name": "${projectName}",
-  "scripts": {
-    "start": "node esbuild.config.dev.mjs"
-  },
-  "browserslist": "last 3 versions"
-}
-`;
-
-const readme = `# React App Created With Juhanify`;
-
-await writeFile(`${projectName}/.gitignore`, gitignore, "utf8");
-await writeFile(`${projectName}/.yarnrc.yml`, yarnrc, "utf8");
-await writeFile(`${projectName}/esbuild.config.dev.mjs`, esbuildDev, "utf8");
-await writeFile(`${projectName}/package.json`, packageJson, "utf8");
-await writeFile(`${projectName}/README.md`, readme, "utf8");
+const packageJson = await readFile(`${sourcePath}/package.json`, "utf-8");
+const finalPackageJson = JSON.parse(packageJson);
+finalPackageJson.name = projectName;
+await writeFile(`${pathToProject}/package.json`, JSON.stringify(finalPackageJson, "", 2));
+await copyFile(`${sourcePath}/.gitignore`, `${pathToProject}/.gitignore`);
+await copyFile(`${sourcePath}/esbuild.config.dev.mjs`, `${pathToProject}/esbuild.config.dev.mjs`);
+await copyFile(`${sourcePath}/README.md`, `${pathToProject}/README.md`);
 
 // ----------- Run commands ----------- //
-
-const pathToProject = resolve(process.cwd(), projectName);
-
 const doSpawn = async (cmd, args, ctx) => {
   return new Promise((res, rej) => {
     const proc = spawn(cmd, args, { cwd: ctx });
@@ -142,11 +85,9 @@ const doSpawn = async (cmd, args, ctx) => {
 };
 
 // ----------- Git init
-
 await doSpawn("git", ["init"], pathToProject);
 
 // ----------- Npm install
-
 await doSpawn("npm", ["install", "react", "react-dom"], pathToProject);
 await doSpawn(
   "npm",

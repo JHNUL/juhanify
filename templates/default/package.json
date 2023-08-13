@@ -1,0 +1,7 @@
+{
+  "name": "$PROJECT_NAME$",
+  "scripts": {
+    "start": "node esbuild.config.dev.mjs"
+  },
+  "browserslist": "last 3 versions"
+}

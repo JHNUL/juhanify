@@ -1,0 +1,14 @@
+{
+  "name": "juhanify",
+  "version": "0.0.1",
+  "description": "Set up a fast React project with minimal everything!",
+  "main": "juhanify.mjs",
+  "bin": {
+    "juhanify": "./juhanify.mjs"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/JHNUL/juhanify.git"
+  },
+  "author": "Juhani Riisiö"
+}
