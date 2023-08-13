@@ -2,13 +2,26 @@
   "name": "juhanify",
   "version": "0.0.1",
   "description": "Set up a fast React project with minimal everything!",
-  "main": "juhanify.mjs",
+  "type": "module",
+  "engines": {
+    "node": ">= 18.0.0"
+  },
+  "exports": {
+    "./juhanify.js": "./juhanify.js",
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "templates",
+    "juhanify.js",
+    "README.md"
+  ],
   "bin": {
-    "juhanify": "./juhanify.mjs"
+    "juhanify": "./juhanify.js"
   },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/JHNUL/juhanify.git"
   },
-  "author": "Juhani Riisiö"
+  "author": "Juhani Riisiö",
+  "license": "MIT"
 }
