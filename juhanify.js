@@ -47,6 +47,7 @@ const pathToProject = resolve(process.cwd(), projectName);
 await mkdir(projectName);
 await mkdir(`${projectName}/public`);
 await mkdir(`${projectName}/src`);
+await mkdir(`${projectName}/tests`);
 
 // ----------- Create public directory content
 const html = await readFile(`${sourcePath}/index.html`, "utf-8");
@@ -55,7 +56,11 @@ await writeFile(`${pathToProject}/public/index.html`, finalHtml);
 
 // ----------- Create src directory content
 await copyFile(`${sourcePath}/index.jsx`, `${pathToProject}/src/index.jsx`);
+await copyFile(`${sourcePath}/App.jsx`, `${pathToProject}/src/App.jsx`);
 await copyFile(`${sourcePath}/index.css`, `${pathToProject}/src/index.css`);
+
+// ----------- Create test directory content
+await copyFile(`${sourcePath}/App.test.js`, `${pathToProject}/tests/App.test.js`);
 
 // ----------- Create root content
 const packageJson = await readFile(`${sourcePath}/package.json`, "utf-8");
@@ -65,6 +70,10 @@ await writeFile(`${pathToProject}/package.json`, JSON.stringify(finalPackageJson
 await writeFile(`${pathToProject}/.gitignore`, "node_modules");
 await copyFile(`${sourcePath}/esbuild.config.dev.mjs`, `${pathToProject}/esbuild.config.dev.mjs`);
 await copyFile(`${sourcePath}/README.md`, `${pathToProject}/README.md`);
+await copyFile(`${sourcePath}/jest.config.js`, `${pathToProject}/jest.config.js`);
+await copyFile(`${sourcePath}/jest.setupAfterEnv.js`, `${pathToProject}/jest.setupAfterEnv.js`);
+await copyFile(`${sourcePath}/jest.transformer.js`, `${pathToProject}/jest.transformer.js`);
+await copyFile(`${sourcePath}/jsconfig.json`, `${pathToProject}/jsconfig.json`);
 
 // ----------- Run commands ----------- //
 const doSpawn = async (cmd, args, ctx) => {
@@ -89,10 +98,19 @@ const doSpawn = async (cmd, args, ctx) => {
 // ----------- Git init
 await doSpawn("git", ["init"], pathToProject);
 
+const deps = ["react@^18.2.0", "react-dom@^18.2.0"];
+
+const devDeps = [
+  "@testing-library/jest-dom@^6.1.1",
+  "@testing-library/react@^14.0.0",
+  "@types/jest@^29.5.4",
+  "cli-color@^2.0.3",
+  "esbuild@^0.19.2",
+  "jest@^29.6.3",
+  "jest-environment-jsdom@^29.6.3",
+  "normalize.css@^8.0.1",
+];
+
 // ----------- Npm install
-await doSpawn("npm", ["install", "react", "react-dom"], pathToProject);
-await doSpawn(
-  "npm",
-  ["install", "--save-dev", "esbuild", "cli-color", "normalize.css"],
-  pathToProject
-);
+await doSpawn("npm", ["install", ...deps], pathToProject);
+await doSpawn("npm", ["install", "--save-dev", ...devDeps], pathToProject);
