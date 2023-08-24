@@ -2,6 +2,7 @@
   "name": "$PROJECT_NAME$",
   "scripts": {
     "start": "node esbuild.config.dev.mjs",
+    "build": "node esbuild.config.prod.mjs",
     "test": "jest ./tests"
   },
   "browserslist": "last 3 versions"

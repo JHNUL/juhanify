@@ -67,7 +67,7 @@ const packageJson = await readFile(`${sourcePath}/package.json`, "utf-8");
 const finalPackageJson = JSON.parse(packageJson);
 finalPackageJson.name = projectName;
 await writeFile(`${pathToProject}/package.json`, JSON.stringify(finalPackageJson, "", 2));
-await writeFile(`${pathToProject}/.gitignore`, "node_modules");
+await writeFile(`${pathToProject}/.gitignore`, "node_modules\nbuild\ndist");
 await copyFile(`${sourcePath}/esbuild.config.dev.mjs`, `${pathToProject}/esbuild.config.dev.mjs`);
 await copyFile(`${sourcePath}/README.md`, `${pathToProject}/README.md`);
 await copyFile(`${sourcePath}/jest.config.js`, `${pathToProject}/jest.config.js`);
