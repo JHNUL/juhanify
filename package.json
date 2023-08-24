@@ -1,6 +1,6 @@
 {
   "name": "juhanify",
-  "version": "0.0.5",
+  "version": "0.0.6",
   "description": "Set up a fast React project with minimal everything!",
   "type": "module",
   "engines": {

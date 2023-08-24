@@ -28,7 +28,7 @@ if (!["default"].includes(template)) {
   process.exit(1);
 }
 
-if (!projectName.match(/[a-zA-Z]{1}[a-zA-Z_\-0-9].*/)) {
+if (!projectName.match(/^[a-zA-Z]{1}[a-zA-Z_\-0-9]{0,}$/)) {
   console.log(`Project name ${projectName} can contain only alphanumerics, underscore and hyphen!`);
   process.exit(1);
 }
