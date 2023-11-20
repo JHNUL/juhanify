@@ -9,7 +9,7 @@ await copyFile("public/index.html", "dist/index.html");
 const ctx = await esbuild.context({
   entryPoints: ["src/index.jsx"],
   bundle: true,
-  minify: true,
+  minify: false,
   sourcemap: true,
   target: ["es2020"],
   outdir: "dist",
