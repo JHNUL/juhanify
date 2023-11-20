@@ -17,6 +17,7 @@ const ctx = await esbuild.context({
 
 const { host, port } = await ctx.serve({
   servedir: "dist",
+  host: "localhost"
 });
 
 console.log(
